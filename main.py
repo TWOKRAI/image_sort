@@ -23,7 +23,7 @@ class ImageSortingWidget(QWidget):
         self.model = SortingModel(self.base_path)
         self.view = MainView()
         self.controller = SortingController(self.model, self.view)
-        
+    
         # Настройка интерфейса
         self.init_ui()
         
