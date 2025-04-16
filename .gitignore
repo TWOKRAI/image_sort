@@ -17,3 +17,5 @@ build/
 # Системные файлы
 .DS_Store
 Thumbs.db
+
+Data_image/
