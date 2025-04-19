@@ -14,6 +14,7 @@ class SortingModel(QObject):
         self.current_folder = ""
         self.current_category = default_category
         
+        self.list_model = []
         self.image_paths = []
         self.name_all_folders = []
 
@@ -122,6 +123,20 @@ class SortingModel(QObject):
 
         # Отправка сигнала об изменении данных
         #self.data_changed.emit()
+
+    
+    def create_list_model(self):
+        for id, image_path in enumerate(self.image_paths):
+            image_properties = {'id': id,
+                                'image_path': image_path,
+                                'category': None
+                    }
+
+            
+            self.list_model.append(image_properties)
+
+        print(self.list_model)
+
 
 
     def move_image(self, src_path, category):

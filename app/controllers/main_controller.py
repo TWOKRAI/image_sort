@@ -34,10 +34,11 @@ class SortingController(QObject):
         name_all_folders = self.model.get_names_folders()
         
         self.model.load_folder(folder_name)
+        self.model.create_list_model()
         
         current_category = self.model.find_key_by_folder(folder_name)
 
-        self.view.grid_widget.update_grid(image_paths = self.model.image_paths,
+        self.view.grid_widget.update_grid(image_list = self.model.list_model,
                                             category_config = self.model.category_config,
                                             current_category = current_category,
                                             name_all_folders = name_all_folders

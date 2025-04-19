@@ -18,8 +18,10 @@ class ImageGridWidget(QWidget):
         self.setLayout(self.grid)
 
 
-    def update_grid(self, image_paths, category_config, current_category, name_all_folders):
+    def update_grid(self, image_list, category_config, current_category, name_all_folders):
         self.clear_grid()
+        
+        image_list
         
         start = self.current_page * self.items_per_page
         current_images = image_paths[start:start+self.items_per_page]
