@@ -5,7 +5,10 @@ class ImageFlipper:
     def __init__(self, source_dir, direction):
         if not os.path.isdir(source_dir):
             raise ValueError(f"Директория {source_dir} не существует")
-        self.source_dir = source_dir
+        
+        self.source_dir = os.path.abspath(source_dir)  # Полный путь к исходной папке
+        self.source_parent = os.path.dirname(self.source_dir)  # Родительская директория
+        self.source_folder_name = os.path.basename(self.source_dir)  # Имя исходной папки
         
         direction = direction.upper()
         if direction not in ('H', 'V'):
@@ -15,17 +18,11 @@ class ImageFlipper:
         self.allowed_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp']
 
     def process(self):
-        base_folder_name = f"turn{self.direction}"
-        folder_index = 0
-        output_dir = base_folder_name
+        base_folder_name = f"{self.source_folder_name}_turn{self.direction}"
+        output_dir = os.path.join(self.source_parent, base_folder_name)
         
-        # Поиск уникального имени для папки
-        while os.path.exists(output_dir):
-            folder_index += 1
-            output_dir = f"{base_folder_name}_{folder_index}"
-        
-        # Создание папки
-        os.makedirs(output_dir)
+        # Создание папки (если существует - перезаписываем)
+        os.makedirs(output_dir, exist_ok=True)
         print(f"Создана папка: {output_dir}")
         
         # Обработка изображений
@@ -48,7 +45,7 @@ class ImageFlipper:
                     
                     # Формирование нового имени
                     name_part = os.path.splitext(filename)[0]
-                    new_filename = f"{name_part}_turn{self.direction}_{folder_index}{ext}"
+                    new_filename = f"{name_part}_turn{self.direction}{ext}"
                     save_path = os.path.join(output_dir, new_filename)
                     
                     # Сохранение
