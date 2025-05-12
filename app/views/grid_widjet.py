@@ -21,7 +21,7 @@ class ImageGridWidget(QWidget):
 
     def update_grid(self, image_list, category_config, current_category, name_all_folders):
         self.clear_grid()
-        
+
         for i, image_list in enumerate(image_list):
             image_path = image_list['image_path']
             row = i // 4
@@ -36,3 +36,11 @@ class ImageGridWidget(QWidget):
             widget = item.widget()
             if widget:
                 widget.deleteLater()
+
+
+    def set_all_checkboxes(self, checked=True):
+        for i in range(self.grid.count()):
+            widget = self.grid.itemAt(i).widget()
+            if isinstance(widget, ImageItemWidget):
+                widget.checkbox.setChecked(checked)
+    

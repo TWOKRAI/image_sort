@@ -17,8 +17,8 @@ class SortingController(QObject):
         self.view.right_panel.next_btn_requested.connect(self.next_item)
         self.view.right_panel.apply_requested.connect(self.handle_process)
         self.view.right_panel.delete_requested.connect(self.handle_delete)
-        self.view.right_panel.select_all_requested.connect(self.handle_delete)
-        self.view.right_panel.reset_requested.connect(self.handle_delete)
+        self.view.right_panel.select_all_requested.connect(self.handle_select_all)
+        self.view.right_panel.reset_requested.connect(self.clear_all_checkboxes)
 
         self.model.data_changed.connect(self.update_view)
 
@@ -111,3 +111,9 @@ class SortingController(QObject):
                 self.view.show_message("Error", f"Failed to delete {path}: {str(e)}")
 
 
+    def handle_select_all(self):
+        self.view.grid_widget.set_all_checkboxes(checked=True)
+
+
+    def clear_all_checkboxes(self):
+        self.view.grid_widget.set_all_checkboxes(checked=False)  
