@@ -109,7 +109,9 @@ class SortingModel(QObject):
 
         :param folder_name: Название папки внутри базового пути (base_path).
         """
-        
+        if folder_name == self.current_folder:
+            return
+
         # Формирование абсолютного пути к целевой папке
         self.current_folder = os.path.join(self.base_path, folder_name)
 
@@ -120,24 +122,20 @@ class SortingModel(QObject):
             if os.path.isfile(os.path.join(self.current_folder, f))
         ]
 
-        #print('self.image_paths', self.image_paths)
-
         # Отправка сигнала об изменении данных
         #self.data_changed.emit()
 
     
     def create_list_model(self):
+        self.list_model = []
+
         for id, image_path in enumerate(self.image_paths):
             image_properties = {'id': id,
                                 'image_path': image_path,
                                 'category': None
                     }
 
-            
             self.list_model.append(image_properties)
-
-        print(self.list_model)
-
 
 
     def move_image(self, src_path, category):

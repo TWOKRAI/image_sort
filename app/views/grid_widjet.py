@@ -10,7 +10,8 @@ class ImageGridWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.items_per_page = 12
-        self.current_page = 0
+        self.current_page = 1
+        self.current_page_max = 1
         self.image_paths = []
 
         self.grid = QGridLayout()
@@ -21,11 +22,8 @@ class ImageGridWidget(QWidget):
     def update_grid(self, image_list, category_config, current_category, name_all_folders):
         self.clear_grid()
         
-        
-        start = self.current_page * self.items_per_page
-        current_images = image_paths[start:start+self.items_per_page]
-
-        for i, image_path in enumerate(current_images):
+        for i, image_list in enumerate(image_list):
+            image_path = image_list['image_path']
             row = i // 4
             col = i % 4
             item = ImageItemWidget(image_path, category_config, current_category, name_all_folders)

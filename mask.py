@@ -573,6 +573,198 @@ class ColorSelectorApp:
         self.process_btn = tk.Button(self.processing_frame, text="Process All Images", command=self.process_all_images)
         self.process_btn.grid(row=0, column=6, padx=10)
 
+    def create_widgets(self):
+        # Создаем основной фрейм с прокруткой
+        self.main_frame = tk.Frame(self.root)
+        self.main_frame.pack(fill=tk.BOTH, expand=True)
+        
+        # Создаем canvas и скроллбар
+        self.canvas = tk.Canvas(self.main_frame)
+        self.scrollbar = tk.Scrollbar(self.main_frame, orient=tk.VERTICAL, command=self.canvas.yview)
+        self.scrollable_frame = tk.Frame(self.canvas)
+        
+        # Настраиваем прокрутку
+        self.scrollable_frame.bind(
+            "<Configure>",
+            lambda e: self.canvas.configure(
+                scrollregion=self.canvas.bbox("all")
+            )
+        )
+        
+        self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+        
+        self.canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        # Привязываем колесо мыши к прокрутке
+        self.canvas.bind_all("<MouseWheel>", lambda event: self.canvas.yview_scroll(int(-1*(event.delta/120)), "units"))
+        
+        # Теперь все виджеты добавляем в scrollable_frame вместо root
+        
+        # Фрейм для изображений
+        self.image_frame = tk.Frame(self.scrollable_frame)
+        self.image_frame.pack(pady=10)
+        
+        # Оригинальное изображение
+        self.original_label = tk.Label(self.image_frame)
+        self.original_label.pack(side=tk.LEFT, padx=10)
+        
+        # Маска
+        self.mask_label = tk.Label(self.image_frame)
+        self.mask_label.pack(side=tk.LEFT, padx=10)
+        
+        # Контуры
+        self.contour_label = tk.Label(self.image_frame)
+        self.contour_label.pack(side=tk.LEFT, padx=10)
+        
+        # Фрейм для управления
+        self.control_frame = tk.Frame(self.scrollable_frame)
+        self.control_frame.pack(pady=10)
+
+        self.circle_label = tk.Label(self.image_frame)
+        self.circle_label.pack(side=tk.LEFT, padx=10)
+        
+        # Кнопки навигации
+        self.prev_btn = tk.Button(self.control_frame, text="<< Previous", command=self.prev_image)
+        self.prev_btn.pack(side=tk.LEFT, padx=5)
+        
+        self.next_btn = tk.Button(self.control_frame, text="Next >>", command=self.next_image)
+        self.next_btn.pack(side=tk.LEFT, padx=5)
+        
+        self.load_btn = tk.Button(self.control_frame, text="Load Folder", command=self.load_folder)
+        self.load_btn.pack(side=tk.LEFT, padx=5)
+
+        # Индикатор процента
+        tk.Label(self.control_frame, text="Selected area:").pack(side=tk.LEFT, padx=5)
+        tk.Label(self.control_frame, textvariable=self.percentage_var).pack(side=tk.LEFT, padx=5)
+    
+        tk.Label(self.control_frame, textvariable=self.mask_area_var).pack(side=tk.LEFT, padx=5)
+        tk.Label(self.control_frame, textvariable=self.circle_area_var).pack(side=tk.LEFT, padx=5)
+        
+        # Фрейм для регуляторов HSV
+        self.hsv_frame = tk.LabelFrame(self.scrollable_frame, text="HSV Filter")
+        self.hsv_frame.pack(pady=10, padx=10, fill=tk.X)
+        
+        # Регуляторы Hue
+        tk.Label(self.hsv_frame, text="Hue Min:").grid(row=0, column=0, padx=5, pady=2)
+        tk.Scale(self.hsv_frame, from_=0, to=179, orient=tk.HORIZONTAL, variable=self.hue_min, command=self.update_display).grid(row=0, column=1, padx=5, pady=2)
+        
+        tk.Label(self.hsv_frame, text="Hue Max:").grid(row=0, column=2, padx=5, pady=2)
+        tk.Scale(self.hsv_frame, from_=0, to=179, orient=tk.HORIZONTAL, variable=self.hue_max, command=self.update_display).grid(row=0, column=3, padx=5, pady=2)
+        
+        # Регуляторы Saturation
+        tk.Label(self.hsv_frame, text="Sat Min:").grid(row=1, column=0, padx=5, pady=2)
+        tk.Scale(self.hsv_frame, from_=0, to=255, orient=tk.HORIZONTAL, variable=self.sat_min, command=self.update_display).grid(row=1, column=1, padx=5, pady=2)
+        
+        tk.Label(self.hsv_frame, text="Sat Max:").grid(row=1, column=2, padx=5, pady=2)
+        tk.Scale(self.hsv_frame, from_=0, to=255, orient=tk.HORIZONTAL, variable=self.sat_max, command=self.update_display).grid(row=1, column=3, padx=5, pady=2)
+        
+        # Регуляторы Value
+        tk.Label(self.hsv_frame, text="Val Min:").grid(row=2, column=0, padx=5, pady=2)
+        tk.Scale(self.hsv_frame, from_=0, to=255, orient=tk.HORIZONTAL, variable=self.val_min, command=self.update_display).grid(row=2, column=1, padx=5, pady=2)
+        
+        tk.Label(self.hsv_frame, text="Val Max:").grid(row=2, column=2, padx=5, pady=2)
+        tk.Scale(self.hsv_frame, from_=0, to=255, orient=tk.HORIZONTAL, variable=self.val_max, command=self.update_display).grid(row=2, column=3, padx=5, pady=2)
+        
+        # Фрейм для регуляторов контуров
+        self.contour_frame = tk.LabelFrame(self.scrollable_frame, text="Contour Settings")
+        self.contour_frame.pack(pady=10, padx=10, fill=tk.X)
+        
+        # Регуляторы для контуров
+        tk.Label(self.contour_frame, text="Threshold:").grid(row=0, column=0, padx=5, pady=2)
+        tk.Scale(self.contour_frame, from_=0, to=255, orient=tk.HORIZONTAL, variable=self.contour_threshold, command=self.update_display).grid(row=0, column=1, padx=5, pady=2)
+        
+        tk.Label(self.contour_frame, text="Min Area:").grid(row=0, column=2, padx=5, pady=2)
+        tk.Scale(self.contour_frame, from_=0, to=2000, orient=tk.HORIZONTAL, variable=self.contour_min_area, command=self.update_display).grid(row=0, column=3, padx=5, pady=2)
+        
+        tk.Label(self.contour_frame, text="Min Perimeter:").grid(row=0, column=4, padx=5, pady=2)
+        tk.Scale(self.contour_frame, from_=0, to=1000, orient=tk.HORIZONTAL, variable=self.min_perimeter, command=self.update_display).grid(row=0, column=5, padx=5, pady=2)
+
+        tk.Label(self.contour_frame, text="Max Perimeter:").grid(row=0, column=6, padx=5, pady=2)
+        tk.Scale(self.contour_frame, from_=0, to=1000, orient=tk.HORIZONTAL, variable=self.max_perimeter, command=self.update_display).grid(row=0, column=7, padx=5, pady=2)
+
+        tk.Label(self.contour_frame, text="Color R:").grid(row=1, column=0, padx=5, pady=2)
+        tk.Scale(self.contour_frame, from_=0, to=255, orient=tk.HORIZONTAL, variable=self.contour_color_r, command=self.update_display).grid(row=1, column=1, padx=5, pady=2)
+        
+        tk.Label(self.contour_frame, text="Color G:").grid(row=1, column=2, padx=5, pady=2)
+        tk.Scale(self.contour_frame, from_=0, to=255, orient=tk.HORIZONTAL, variable=self.contour_color_g, command=self.update_display).grid(row=1, column=3, padx=5, pady=2)
+        
+        tk.Label(self.contour_frame, text="Color B:").grid(row=1, column=4, padx=5, pady=2)
+        tk.Scale(self.contour_frame, from_=0, to=255, orient=tk.HORIZONTAL, variable=self.contour_color_b, command=self.update_display).grid(row=1, column=5, padx=5, pady=2)
+
+        # Дополнительные регуляторы для контуров
+        tk.Label(self.contour_frame, text="Thickness:").grid(row=2, column=0, padx=5, pady=2)
+        tk.Scale(self.contour_frame, from_=1, to=10, orient=tk.HORIZONTAL, variable=self.contour_thickness, command=self.update_display).grid(row=2, column=1, padx=5, pady=2)
+
+        tk.Label(self.contour_frame, text="Line Type:").grid(row=2, column=2, padx=5, pady=2)
+        tk.OptionMenu(self.contour_frame, self.line_type, *self.line_type_options, command=self.update_display).grid(row=2, column=3, padx=5, pady=2)
+
+        tk.Label(self.contour_frame, text="Contour Mode:").grid(row=3, column=0, padx=5, pady=2)
+        tk.OptionMenu(self.contour_frame, self.contour_mode, *self.contour_mode_options, command=self.update_display).grid(row=3, column=1, padx=5, pady=2)
+
+        tk.Label(self.contour_frame, text="Approx Method:").grid(row=3, column=2, padx=5, pady=2)
+        tk.OptionMenu(self.contour_frame, self.approx_method, *self.approx_method_options, command=self.update_display).grid(row=3, column=3, padx=5, pady=2)
+
+        # Фрейм для обнаружения кругов
+        self.circle_frame = tk.LabelFrame(self.scrollable_frame, text="Circle Detection")
+        self.circle_frame.pack(pady=10, padx=10, fill=tk.X)
+
+        # Чекбокс для включения/выключения обнаружения кругов
+        tk.Checkbutton(self.circle_frame, text="Detect Circles", variable=self.detect_circles, command=self.update_display).grid(row=0, column=0, padx=5, pady=2)
+
+        # Параметры для обнаружения кругов
+        tk.Label(self.circle_frame, text="dp:").grid(row=0, column=1, padx=5, pady=2)
+        tk.Scale(self.circle_frame, from_=0.1, to=3, resolution=0.1, orient=tk.HORIZONTAL, variable=self.dp, command=self.update_display).grid(row=0, column=2, padx=5, pady=2)
+
+        tk.Label(self.circle_frame, text="Min Dist:").grid(row=0, column=3, padx=5, pady=2)
+        tk.Scale(self.circle_frame, from_=1, to=100, orient=tk.HORIZONTAL, variable=self.min_dist, command=self.update_display).grid(row=0, column=4, padx=5, pady=2)
+
+        tk.Label(self.circle_frame, text="Param1:").grid(row=1, column=0, padx=5, pady=2)
+        tk.Scale(self.circle_frame, from_=1, to=200, orient=tk.HORIZONTAL, variable=self.param1, command=self.update_display).grid(row=1, column=1, padx=5, pady=2)
+
+        tk.Label(self.circle_frame, text="Param2:").grid(row=1, column=2, padx=5, pady=2)
+        tk.Scale(self.circle_frame, from_=1, to=100, orient=tk.HORIZONTAL, variable=self.param2, command=self.update_display).grid(row=1, column=3, padx=5, pady=2)
+
+        tk.Label(self.circle_frame, text="Min Radius:").grid(row=1, column=4, padx=5, pady=2)
+        tk.Scale(self.circle_frame, from_=0, to=500, orient=tk.HORIZONTAL, variable=self.min_radius, command=self.update_display).grid(row=1, column=5, padx=5, pady=2)
+
+        tk.Label(self.circle_frame, text="Max Radius:").grid(row=1, column=6, padx=5, pady=2)
+        tk.Scale(self.circle_frame, from_=0, to=500, orient=tk.HORIZONTAL, variable=self.max_radius, command=self.update_display).grid(row=1, column=7, padx=5, pady=2)
+
+        tk.Label(self.circle_frame, text="Delta max Radius:").grid(row=1, column=8, padx=5, pady=2)
+        tk.Scale(self.circle_frame, from_=0, to=50, orient=tk.HORIZONTAL, variable=self.delta_max_radius, command=self.update_display).grid(row=1, column=9, padx=5, pady=2)
+
+        tk.Label(self.circle_frame, text="Circle Color R:").grid(row=2, column=0, padx=5, pady=2)
+        tk.Scale(self.circle_frame, from_=0, to=255, orient=tk.HORIZONTAL, variable=self.circle_color_r, command=self.update_display).grid(row=2, column=1, padx=5, pady=2)
+
+        tk.Label(self.circle_frame, text="Circle Color G:").grid(row=2, column=2, padx=5, pady=2)
+        tk.Scale(self.circle_frame, from_=0, to=255, orient=tk.HORIZONTAL, variable=self.circle_color_g, command=self.update_display).grid(row=2, column=3, padx=5, pady=2)
+
+        tk.Label(self.circle_frame, text="Circle Color B:").grid(row=2, column=4, padx=5, pady=2)
+        tk.Scale(self.circle_frame, from_=0, to=255, orient=tk.HORIZONTAL, variable=self.circle_color_b, command=self.update_display).grid(row=2, column=5, padx=5, pady=2)
+
+        tk.Label(self.circle_frame, text="Circle Thickness:").grid(row=2, column=6, padx=5, pady=2)
+        tk.Scale(self.circle_frame, from_=1, to=10, orient=tk.HORIZONTAL, variable=self.circle_thickness, command=self.update_display).grid(row=2, column=7, padx=5, pady=2)
+            
+        # Фрейм для порогов и кнопки обработки
+        self.processing_frame = tk.LabelFrame(self.scrollable_frame, text="Batch Processing")
+        self.processing_frame.pack(pady=10, padx=10, fill=tk.X)
+
+        # Поля для порогов
+        tk.Label(self.processing_frame, text="Low Threshold (%):").grid(row=0, column=0, padx=5)
+        tk.Entry(self.processing_frame, textvariable=self.low_threshold, width=5).grid(row=0, column=1, padx=5)
+        
+        tk.Label(self.processing_frame, text="Medium Threshold (%):").grid(row=0, column=2, padx=5)
+        tk.Entry(self.processing_frame, textvariable=self.medium_threshold, width=5).grid(row=0, column=3, padx=5)
+        
+        tk.Label(self.processing_frame, text="High Threshold (%):").grid(row=0, column=4, padx=5)
+        tk.Entry(self.processing_frame, textvariable=self.high_threshold, width=5).grid(row=0, column=5, padx=5)
+        
+        # Кнопка обработки
+        self.process_btn = tk.Button(self.processing_frame, text="Process All Images", command=self.process_all_images)
+        self.process_btn.grid(row=0, column=6, padx=10)
+
     def load_folder(self):
         self.image_folder = filedialog.askdirectory()
         if not self.image_folder:
@@ -740,7 +932,7 @@ class ColorSelectorApp:
             self.result = cv2.bitwise_and(image, image, mask=inverted_mask)  # оригинальные области
             self.result = cv2.add(self.result, cv2.bitwise_and(white_background, white_background, mask=mask))  # добавляем белые области
 
-            gray = cv2.cvtColor(self.result, cv2.COLOR_BGR2GRAY)
+            gray = cv2.cvtColor(hsv_image, cv2.COLOR_BGR2GRAY)
             
             circles = cv2.HoughCircles(
                 gray,

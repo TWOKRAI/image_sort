@@ -51,12 +51,12 @@ class ImageSortingWidget(QWidget):
 if __name__ == "__main__":
     import sys
     from PyQt5.QtWidgets import QApplication
-    import qdarkstyle
+    #import qdarkstyle
 
-    dark_stylesheet = qdarkstyle.load_stylesheet_pyqt5()
+    #dark_stylesheet = qdarkstyle.load_stylesheet_pyqt5()
 
     app = QApplication(sys.argv)
-    app.setStyleSheet(dark_stylesheet)
+    #app.setStyleSheet(dark_stylesheet)
     widget = ImageSortingWidget()
     widget.setWindowTitle("Image Sorter")
     widget.resize(800, 600)

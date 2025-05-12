@@ -28,23 +28,35 @@ class SortingController(QObject):
         # self.initialization_ui()
 
     def update_view(self):
-        #self.view.left_panel.load_available_folders(self.model.get_name_folders())
-        #         
         folder_name = self.view.left_panel.folder_combo.currentText()
         name_all_folders = self.model.get_names_folders()
-        
+
         self.model.load_folder(folder_name)
         self.model.create_list_model()
         
         current_category = self.model.find_key_by_folder(folder_name)
 
-        self.view.grid_widget.update_grid(image_list = self.model.list_model,
+        all_images = len(self.model.list_model)
+
+        self.view.grid_widget.current_page_max = all_images // self.view.grid_widget.items_per_page
+
+        if all_images % self.view.grid_widget.items_per_page != 0:
+            self.view.grid_widget.current_page_max += 1
+
+        start = (self.view.grid_widget.current_page - 1) * self.view.grid_widget.items_per_page
+        current_images = self.model.list_model[start:start+self.view.grid_widget.items_per_page]
+
+    
+        self.view.left_panel.update_page_label(start + len(current_images), all_images)
+
+        
+        self.view.grid_widget.update_grid(image_list = current_images,
                                             category_config = self.model.category_config,
                                             current_category = current_category,
                                             name_all_folders = name_all_folders
                                         )
         
-        self.view.left_panel.update_counter_label(len(self.model.image_paths))
+        # self.view.left_panel.update_counter_label(len(self.model.image_paths))
 
 
     def update_combobox_category(self):
@@ -54,10 +66,8 @@ class SortingController(QObject):
     
         
     def handle_folder_change(self, folder_name):
+        self.view.grid_widget.current_page = 1
 
-        folder_name2 = self.view.left_panel.folder_combo.currentText()
-        print(folder_name, folder_name2)
-        
         try:
             self.update_view()
         except Exception as e:
@@ -72,11 +82,17 @@ class SortingController(QObject):
 
 
     def prev_item(self):
-        pass
+        if 1 < self.view.grid_widget.current_page:
+            self.view.grid_widget.current_page -= 1
+
+        self.update_view()
 
 
     def next_item(self):
-        pass
+        if self.view.grid_widget.current_page < self.view.grid_widget.current_page_max:
+            self.view.grid_widget.current_page += 1
+
+        self.update_view()
 
 
     def handle_process(self, items):

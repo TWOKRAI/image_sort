@@ -50,6 +50,10 @@ class LeftPanel(QFrame):
     def create_page_label(self):
         page_label = QLabel("0/0")
         return page_label
+    
+    
+    def update_page_label(self, current_page, total_pages):
+        self.page_label.setText(f"{current_page}/{total_pages}")
 
 
     def create_clear_button(self):
@@ -61,7 +65,3 @@ class LeftPanel(QFrame):
     def setup_connections(self):
         self.folder_combo.currentTextChanged.connect(self.folder_changed)
         self.clear_btn.clicked.connect(self.clear_requested)
-
-
-    def update_counter_label(self, all_image):
-        self.page_label.setText(f'{0} / {all_image}')
