@@ -12,6 +12,7 @@ class SortingModel(QObject):
         super().__init__()
         self.base_path = os.path.normpath(base_path)
         self.current_folder = ""
+        self.category = None
         self.current_category = default_category
         
         self.list_model = []
@@ -111,6 +112,8 @@ class SortingModel(QObject):
         """
         if folder_name == self.current_folder:
             return
+        
+        self.category = self.find_key_by_folder(folder_name)
 
         # Формирование абсолютного пути к целевой папке
         self.current_folder = os.path.join(self.base_path, folder_name)
@@ -132,10 +135,13 @@ class SortingModel(QObject):
         for id, image_path in enumerate(self.image_paths):
             image_properties = {'id': id,
                                 'image_path': image_path,
-                                'category': None
+                                'category': self.category,
+                                'select': False
                     }
 
             self.list_model.append(image_properties)
+        
+        self.list_model_original = self.list_model.copy()
 
 
     def move_image(self, src_path, category):
@@ -164,9 +170,6 @@ class SortingModel(QObject):
 
         # Выполнение перемещения файла
         shutil.move(src_path, dest_path)
-
-        # Уведомление подписчиков об изменении данных
-        #self.data_changed.emit()
 
 
     def delete_image(self, path):

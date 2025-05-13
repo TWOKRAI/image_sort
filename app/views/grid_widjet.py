@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QGridLayout
+from PyQt5.QtWidgets import QWidget, QGridLayout, QHBoxLayout, QVBoxLayout
 from PyQt5.QtCore import Qt, pyqtSignal
 
 from app.widgets.image_widget import ImageItemWidget
@@ -14,19 +14,42 @@ class ImageGridWidget(QWidget):
         self.current_page_max = 1
         self.image_paths = []
 
+        # Создаем вертикальный макет
+        vertical_layout = QVBoxLayout()
+        vertical_layout.setContentsMargins(0, 0, 0, 0)
+
+        # Создаем горизонтальный макет для добавления гибкого пространства слева и справа
+        horizontal_layout = QHBoxLayout()
+        horizontal_layout.setContentsMargins(0, 0, 0, 0)
+
         self.grid = QGridLayout()
         self.grid.setSpacing(15)
-        self.setLayout(self.grid)
+
+        # Добавляем QGridLayout в горизонтальный макет
+        horizontal_layout.addLayout(self.grid)
+
+        # Добавляем гибкое пространство справа
+        horizontal_layout.addStretch()
+
+        # Добавляем горизонтальный макет в вертикальный макет
+        vertical_layout.addLayout(horizontal_layout)
+
+        # Добавляем гибкое пространство снизу
+        vertical_layout.addStretch()
+
+        # Устанавливаем вертикальный макет в окно
+        self.setLayout(vertical_layout)
 
 
-    def update_grid(self, image_list, category_config, current_category, name_all_folders):
+
+    def update_grid(self, image_list, category_config, name_all_folders):
         self.clear_grid()
 
-        for i, image_list in enumerate(image_list):
-            image_path = image_list['image_path']
+        for i,  image_properties in enumerate(image_list):
             row = i // 4
             col = i % 4
-            item = ImageItemWidget(image_path, category_config, current_category, name_all_folders)
+
+            item = ImageItemWidget(image_properties, category_config, name_all_folders)
             self.grid.addWidget(item, row, col, Qt.AlignCenter)
 
 

@@ -47,12 +47,18 @@ class ImageItemWidget(QWidget):
     selection_changed = pyqtSignal(str, bool)
     category_changed = pyqtSignal(str, str)
 
-    def __init__(self, image_path, category_config, current_category, name_all_folders, parent=None):
+    def __init__(self, image_properties, category_config, name_all_folders, parent=None):
         super().__init__(parent)
-        self.image_path = image_path
+        self.image_properties = image_properties
+
+        self.image_path = image_properties['image_path']
+        self.select = image_properties['select']
+        self.category = image_properties['category']
+
         self.name_all_folders = name_all_folders
         self.category_config = category_config
-        self.current_category_config = category_config[current_category]
+        
+        self.current_category_config = category_config[self.category]
         
         self.init_ui()
         self.setup_connections()
@@ -84,12 +90,13 @@ class ImageItemWidget(QWidget):
                     background-color: #0078D7;
                 }
             """)
-        
+
+        self.checkbox.setChecked(self.select)
         
         self.category_combo = CategoryComboBox(self.name_all_folders, self)
         self.category_combo.setGeometry(10, 148, 128, 30)
-        self.category_combo.setCurrentText(self.current_category_config ['category'])
-        self.image_label.set_border_color(self.current_category_config ['color'])
+        self.category_combo.setCurrentText(self.current_category_config['folder'])
+        self.image_label.set_border_color(self.current_category_config['color'])
 
 
     def setup_connections(self):
@@ -100,8 +107,14 @@ class ImageItemWidget(QWidget):
             )
         )
 
+        self.checkbox.stateChanged.connect(self.select_checkbox)
+
         self.category_combo.currentTextChanged.connect(
             self.handle_category_change
+        )
+        
+        self.category_combo.currentTextChanged.connect(
+            self.select_category
         )
         
         self.image_label.clicked.connect(
@@ -110,6 +123,15 @@ class ImageItemWidget(QWidget):
             )
         )
 
+    def select_checkbox(self):
+        self.image_properties['select'] = self.checkbox.isChecked()
+
+
+    def select_category(self, selected_folder):
+        for category in self.category_config.values():
+            if category['folder'] == selected_folder:
+                self.image_properties['category'] = category['category']
+                return
 
     def set_category_info(self, category_name, color):
         """Обновление категории и цвета"""

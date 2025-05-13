@@ -15,26 +15,29 @@ class SortingController(QObject):
 
         self.view.right_panel.prev_btn_requested.connect(self.prev_item)
         self.view.right_panel.next_btn_requested.connect(self.next_item)
+
         self.view.right_panel.apply_requested.connect(self.handle_process)
-        self.view.right_panel.delete_requested.connect(self.handle_delete)
-        self.view.right_panel.select_all_requested.connect(self.handle_select_all)
         self.view.right_panel.reset_requested.connect(self.clear_all_checkboxes)
+        self.view.right_panel.select_all_requested.connect(self.handle_select_all)
+        self.view.right_panel.delete_requested.connect(self.handle_delete)
 
         self.model.data_changed.connect(self.update_view)
 
         self.update_combobox_category()
+        self.update_model()
         self.update_view()
 
         # self.initialization_ui()
 
-    def update_view(self):
+    def update_model(self):
         folder_name = self.view.left_panel.folder_combo.currentText()
-        name_all_folders = self.model.get_names_folders()
 
         self.model.load_folder(folder_name)
         self.model.create_list_model()
-        
-        current_category = self.model.find_key_by_folder(folder_name)
+
+
+    def update_view(self):
+        name_all_folders = self.model.get_names_folders()
 
         all_images = len(self.model.list_model)
 
@@ -45,28 +48,24 @@ class SortingController(QObject):
 
         start = (self.view.grid_widget.current_page - 1) * self.view.grid_widget.items_per_page
         current_images = self.model.list_model[start:start+self.view.grid_widget.items_per_page]
-
-    
+        
         self.view.left_panel.update_page_label(start + len(current_images), all_images)
 
-        
         self.view.grid_widget.update_grid(image_list = current_images,
                                             category_config = self.model.category_config,
-                                            current_category = current_category,
                                             name_all_folders = name_all_folders
                                         )
-        
-        # self.view.left_panel.update_counter_label(len(self.model.image_paths))
 
 
     def update_combobox_category(self):
-        #category_list = self.model.get_category()
         folders_list = self.model.get_names_folders()
         self.view.left_panel.load_available_items(folders_list)
     
         
     def handle_folder_change(self, folder_name):
         self.view.grid_widget.current_page = 1
+
+        self.update_model()
 
         try:
             self.update_view()
@@ -95,7 +94,8 @@ class SortingController(QObject):
         self.update_view()
 
 
-    def handle_process(self, items):
+    def handle_process(self):
+        items = []
         for path, category in items:
             try:
                 self.model.move_image(path, category)

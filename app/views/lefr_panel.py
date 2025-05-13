@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QVBoxLayout, QComboBox, QPushButton, QLabel, QFrame
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QComboBox, QPushButton, QLabel, QFrame
 from PyQt5.QtCore import pyqtSignal
 
 
@@ -14,6 +14,24 @@ class LeftPanel(QFrame):
         self.setup_connections()
 
 
+    # def init_ui(self):
+    #     layout = QVBoxLayout()
+
+    #     self.folder_combo = self.create_folder_combo()
+    #     layout.addWidget(self.folder_combo, 1)
+    #     layout.addSpacing(20)
+
+    #     self.page_label = self.create_page_label()
+    #     layout.addWidget(self.page_label)
+    #     layout.addSpacing(20)
+
+    #     self.clear_btn = self.create_clear_button()
+    #     layout.addWidget(self.clear_btn)
+
+    #     layout.addStretch()
+
+    #     self.setLayout(layout)
+
     def init_ui(self):
         layout = QVBoxLayout()
 
@@ -21,12 +39,21 @@ class LeftPanel(QFrame):
         layout.addWidget(self.folder_combo, 1)
         layout.addSpacing(20)
 
+        # Создаем горизонтальный макет для self.page_label
+        page_label_layout = QHBoxLayout()
+        page_label_layout.addStretch()  # Гибкое пространство слева
         self.page_label = self.create_page_label()
-        layout.addWidget(self.page_label)
+        page_label_layout.addWidget(self.page_label)
+        page_label_layout.addStretch()  # Гибкое пространство справа
+
+        # Добавляем горизонтальный макет в вертикальный макет
+        layout.addLayout(page_label_layout)
         layout.addSpacing(20)
 
         self.clear_btn = self.create_clear_button()
         layout.addWidget(self.clear_btn)
+
+        layout.addStretch()
 
         self.setLayout(layout)
 
