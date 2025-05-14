@@ -268,3 +268,39 @@ class SortingModel(QObject):
             if cat['folder'] == category_folder:
                 return cat['color']
         return QColor(Qt.transparent)
+    
+    
+    def add_category(self, category, folder, color=None):
+        """
+        Добавляет новую категорию в category_config.
+
+        :param category: Название категории.
+        :param folder: Название папки.
+        :param color: Цвет (по умолчанию QColor('#ffffff')).
+        """
+        if color is None:
+            color = QColor('#ffffff')  # Цвет по умолчанию
+
+        self.category_config[category] = {
+            'category': category,
+            'folder': folder,
+            'counter': 0,
+            'color': color
+        }
+
+    def create_folder(self, folder_name):
+        """
+        Создает папку в базовой директории.
+
+        :param folder_name: Название папки, которую нужно создать.
+        """
+        # Полный путь к новой папке
+        folder_path = os.path.join(self.base_path, folder_name)
+
+        # Проверяем, существует ли уже такая папка
+        if not os.path.exists(folder_path):
+            # Создаем папку
+            os.makedirs(folder_path)
+            print(f"Папка '{folder_name}' создана по пути: {folder_path}")
+        else:
+            print(f"Папка '{folder_name}' уже существует по пути: {folder_path}")

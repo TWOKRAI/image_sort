@@ -1,5 +1,7 @@
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QComboBox, QPushButton, QLabel, QFrame
+from PyQt5.QtWidgets import (QVBoxLayout, QHBoxLayout, 
+            QComboBox, QPushButton, QLabel, QFrame, QLineEdit)
 from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtGui import QFont
 
 
 class LeftPanel(QFrame):
@@ -53,10 +55,19 @@ class LeftPanel(QFrame):
         self.clear_btn = self.create_clear_button()
         layout.addWidget(self.clear_btn)
 
+        # Добавляем окно ввода и кнопку "Добавить"
+        self.input_field_category = QLineEdit()
+        layout.addWidget(self.input_field_category)
+
+        self.input_field_folder = QLineEdit()
+        layout.addWidget(self.input_field_folder)
+
+        self.add_btn = QPushButton("Добавить")
+        layout.addWidget(self.add_btn)
+
         layout.addStretch()
 
         self.setLayout(layout)
-
 
     def create_folder_combo(self):
         folder_combo = QComboBox()
@@ -76,6 +87,12 @@ class LeftPanel(QFrame):
 
     def create_page_label(self):
         page_label = QLabel("0/0")
+
+        font = QFont()
+        font.setFamily("Arial") 
+        font.setPointSize(12)    
+        page_label.setFont(font)
+
         return page_label
     
     

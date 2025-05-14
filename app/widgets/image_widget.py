@@ -100,12 +100,12 @@ class ImageItemWidget(QWidget):
 
 
     def setup_connections(self):
-        self.checkbox.stateChanged.connect(
-            lambda: self.selection_changed.emit(
-                self.image_path, 
-                self.checkbox.isChecked()
-            )
-        )
+        # self.checkbox.stateChanged.connect(
+        #     lambda: self.selection_changed.emit(
+        #         self.image_path, 
+        #         self.checkbox.isChecked()
+        #     )
+        # )
 
         self.checkbox.stateChanged.connect(self.select_checkbox)
 
@@ -155,7 +155,13 @@ class ImageItemWidget(QWidget):
         for category in self.category_config.values():
             if category['folder'] == selected_folder:
                 self.image_label.set_border_color(category['color'])
+
+                self.select_category(selected_folder)
+
+                self.checkbox.setChecked(True)
+                self.select_checkbox()
+
                 return
-        
+            
         # Если не нашли - устанавливаем цвет по умолчанию
         self.image_label.set_border_color(Qt.transparent)

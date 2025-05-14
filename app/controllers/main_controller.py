@@ -12,6 +12,7 @@ class SortingController(QObject):
 
         self.view.left_panel.folder_changed.connect(self.handle_folder_change)
         self.view.left_panel.clear_requested.connect(self.clear_current_folder)
+        self.view.left_panel.add_btn.clicked.connect(self.on_add_button_click)
 
         self.view.right_panel.prev_btn_requested.connect(self.prev_item)
         self.view.right_panel.next_btn_requested.connect(self.next_item)
@@ -114,6 +115,31 @@ class SortingController(QObject):
     def handle_select_all(self):
         self.view.grid_widget.set_all_checkboxes(checked=True)
 
+        print(self.model.list_model)
+
 
     def clear_all_checkboxes(self):
         self.view.grid_widget.set_all_checkboxes(checked=False)  
+
+        print(self.model.list_model)
+
+    def on_add_button_click(self):
+        # Получаем текст из поля ввода
+        text_category = self.view.left_panel.input_field_category.text()
+        text_folder = self.view.left_panel.input_field_folder.text()
+
+        if text_category and text_folder:
+            # Здесь вы можете добавить свою логику обработки текста
+            self.model.add_category(text_category, text_folder)
+
+            self.model.create_folder(text_folder)
+
+            self.update_combobox_category()
+
+            self.update_view()
+        else:
+            self.view.show_message(self, "Предупреждение", "Поле ввода пустое!")
+
+
+
+        
