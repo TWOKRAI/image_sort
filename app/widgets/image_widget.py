@@ -44,13 +44,14 @@ class CategoryComboBox(QComboBox):
 
 
 class ImageItemWidget(QWidget):
-    selection_changed = pyqtSignal(str, bool)
+    selection_changed = pyqtSignal(int, bool)
     category_changed = pyqtSignal(str, str)
 
     def __init__(self, image_properties, category_config, name_all_folders, parent=None):
         super().__init__(parent)
         self.image_properties = image_properties
 
+        self.id = image_properties['id']
         self.image_path = image_properties['image_path']
         self.select = image_properties['select']
         self.category = image_properties['category']
@@ -100,12 +101,12 @@ class ImageItemWidget(QWidget):
 
 
     def setup_connections(self):
-        # self.checkbox.stateChanged.connect(
-        #     lambda: self.selection_changed.emit(
-        #         self.image_path, 
-        #         self.checkbox.isChecked()
-        #     )
-        # )
+        self.checkbox.stateChanged.connect(
+            lambda: self.selection_changed.emit(
+                self.id, 
+                self.checkbox.isChecked()
+            )
+        )
 
         self.checkbox.stateChanged.connect(self.select_checkbox)
 
@@ -124,7 +125,8 @@ class ImageItemWidget(QWidget):
         )
 
     def select_checkbox(self):
-        self.image_properties['select'] = self.checkbox.isChecked()
+        check_state = self.checkbox.isChecked()
+        self.image_properties['select'] = check_state
 
 
     def select_category(self, selected_folder):

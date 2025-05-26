@@ -1,5 +1,6 @@
 import os
 import shutil
+import time
 from PyQt5.QtCore import Qt, pyqtSignal, QObject
 from PyQt5.QtGui import QColor
 
@@ -7,6 +8,8 @@ from PyQt5.QtGui import QColor
 class SortingModel(QObject):
     data_changed = pyqtSignal()
     error_occurred = pyqtSignal(str, str)
+    progress_bar = pyqtSignal(int)
+
 
     def __init__(self, base_path, default_category='neutral'):
         super().__init__()
@@ -38,6 +41,8 @@ class SortingModel(QObject):
                     'color': QColor('#ff5770')
                     }
         }
+
+        self.select_count = 0
 
         self.select_category = {}
 
@@ -244,7 +249,7 @@ class SortingModel(QObject):
         
         return self.name_all_folders
     
-
+    
     def get_category(self):
         return list(self.category_config.keys())
     
@@ -304,3 +309,57 @@ class SortingModel(QObject):
             print(f"Папка '{folder_name}' создана по пути: {folder_path}")
         else:
             print(f"Папка '{folder_name}' уже существует по пути: {folder_path}")
+
+
+    def process_selected_images(self):
+        """
+        Перемещает выбранные изображения в папки соответствующих категорий, если их категория была изменена.
+        Обновляет список изображений после перемещения.
+        """
+        if not self.current_folder:
+            self.error_occurred.emit("PROCESS_ERROR", "No folder loaded")
+            return
+        
+        # Получаем список выбранных элементов
+        #selected_elements = [element for element in self.list_model if element['select']]
+        #total_files = len(self.list_model)
+
+        total_files = self.select_count
+        
+        if total_files == 0:
+            self.error_occurred.emit("PROCESS_ERROR", "No files selected")
+            return
+
+        # Рассчитываем шаг прогресса на файл
+        step = 100.0 / total_files
+        moved = False
+
+        try:
+            for i, element in enumerate(self.list_model, 1):
+                if element['select']:
+                    target_category = element['category']
+                    if target_category != self.category:
+                        src_path = element['image_path']
+                        if os.path.exists(src_path):
+                            self.move_image(src_path, target_category)
+                            moved = True
+                        else:
+                            self.error_occurred.emit("MOVE_ERROR", f"File not found: {src_path}")
+
+                    # Обновляем прогресс с учетом текущего шага
+                    self.progress_bar.emit(int(step)) 
+
+        except Exception as e:
+            self.error_occurred.emit("MOVE_ERROR", str(e))
+        finally:
+            if moved:
+                folder_name = os.path.basename(self.current_folder)
+                self.load_folder(folder_name)
+                self.create_list_model()
+
+
+    def increment_selection(self, id, state):
+        if state:
+            self.select_count += 1
+        else:
+            self.select_count -= 1

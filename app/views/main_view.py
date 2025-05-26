@@ -1,9 +1,10 @@
-from PyQt5.QtWidgets import QWidget, QHBoxLayout
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout
 
-from app.views.lefr_panel import LeftPanel
+#from app.views.lefr_panel import LeftPanel
+from app.widgets.left_panel_widget import LeftPanel
 from app.views.grid_widjet import ImageGridWidget
 from app.views.right_panel import RightPanel
-
+from app.views.progress_bar import ProgressBarWidget
 
 class MainView(QWidget):
     def __init__(self):
@@ -11,22 +12,27 @@ class MainView(QWidget):
         self.left_panel = LeftPanel()
         self.right_panel = RightPanel()
         self.grid_widget = ImageGridWidget()
+        self.progress_bar_widget = ProgressBarWidget()  # Новый виджет
         
         self.init_ui()
-        self.setup_connections()
 
 
     def init_ui(self):
-        main_layout = QHBoxLayout()
-        main_layout.addWidget(self.left_panel)
-        main_layout.addWidget(self.grid_widget, 1)
-        main_layout.addWidget(self.right_panel)
+        main_layout = QVBoxLayout()
+        
+        # Верхняя часть с существующими элементами
+        top_layout = QHBoxLayout()
+        top_layout.addWidget(self.left_panel)
+        top_layout.addWidget(self.grid_widget, 1)
+        top_layout.addWidget(self.right_panel)
+        
+        # Добавляем все элементы в главный макет
+        main_layout.addLayout(top_layout, 90)  # 90% места
+        main_layout.addWidget(self.progress_bar_widget, 10)  # 10% места
+        
         self.setLayout(main_layout)
 
 
-    def setup_connections(self):
-        # self.right_panel.prev_btn.clicked.connect(
-        #     lambda: self.grid_widget.page_changed.emit(-1))
-        # self.right_panel.next_btn.clicked.connect(
-        #     lambda: self.grid_widget.page_changed.emit(1))
+    def show_message(self, error, message):
         pass
+        

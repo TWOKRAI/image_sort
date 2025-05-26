@@ -3,6 +3,8 @@ from PyQt5.QtCore import QObject
 from app.views.main_view import MainView
 from app.models.image_model import SortingModel
 
+from app.widgets.image_widget import ImageItemWidget
+
 
 class SortingController(QObject):
     def __init__(self, model: SortingModel, view: MainView):
@@ -14,13 +16,20 @@ class SortingController(QObject):
         self.view.left_panel.clear_requested.connect(self.clear_current_folder)
         self.view.left_panel.add_btn.clicked.connect(self.on_add_button_click)
 
+        self.view.grid_widget.select_changed.connect(self.increment_selection)
+
         self.view.right_panel.prev_btn_requested.connect(self.prev_item)
         self.view.right_panel.next_btn_requested.connect(self.next_item)
 
-        self.view.right_panel.apply_requested.connect(self.handle_process)
+        self.view.right_panel.apply_requested.connect(self.right_panel_apply_requested)
+
+        self.view.right_panel.reset_requested.connect(self.reset_category)
         self.view.right_panel.reset_requested.connect(self.clear_all_checkboxes)
+
         self.view.right_panel.select_all_requested.connect(self.handle_select_all)
         self.view.right_panel.delete_requested.connect(self.handle_delete)
+
+        self.model.progress_bar.connect(self.view.progress_bar_widget.add_progress)
 
         self.model.data_changed.connect(self.update_view)
 
@@ -32,6 +41,9 @@ class SortingController(QObject):
 
     def update_model(self):
         folder_name = self.view.left_panel.folder_combo.currentText()
+
+        self.model.select_count = 0
+        self.view.left_panel.update_select_label(self.model.select_count)
 
         self.model.load_folder(folder_name)
         self.model.create_list_model()
@@ -48,11 +60,11 @@ class SortingController(QObject):
             self.view.grid_widget.current_page_max += 1
 
         start = (self.view.grid_widget.current_page - 1) * self.view.grid_widget.items_per_page
-        current_images = self.model.list_model[start:start+self.view.grid_widget.items_per_page]
+        self.current_images = self.model.list_model[start:start+self.view.grid_widget.items_per_page]
         
-        self.view.left_panel.update_page_label(start + len(current_images), all_images)
+        self.view.left_panel.update_page_label(start + len(self.current_images), all_images)
 
-        self.view.grid_widget.update_grid(image_list = current_images,
+        self.view.grid_widget.update_grid(image_list = self.current_images,
                                             category_config = self.model.category_config,
                                             name_all_folders = name_all_folders
                                         )
@@ -96,12 +108,12 @@ class SortingController(QObject):
 
 
     def handle_process(self):
-        items = []
-        for path, category in items:
-            try:
-                self.model.move_image(path, category)
-            except Exception as e:
-                self.view.show_message("Error", f"Failed to process {path}: {str(e)}")
+        print(self.model.list_model)
+        # for path, category in items:
+        #     try:
+        #         self.model.move_image(path, category)
+        #     except Exception as e:
+        #         self.view.show_message("Error", f"Failed to process {path}: {str(e)}")
 
 
     def handle_delete(self, items):
@@ -115,13 +127,10 @@ class SortingController(QObject):
     def handle_select_all(self):
         self.view.grid_widget.set_all_checkboxes(checked=True)
 
-        print(self.model.list_model)
-
 
     def clear_all_checkboxes(self):
         self.view.grid_widget.set_all_checkboxes(checked=False)  
 
-        print(self.model.list_model)
 
     def on_add_button_click(self):
         # Получаем текст из поля ввода
@@ -129,7 +138,6 @@ class SortingController(QObject):
         text_folder = self.view.left_panel.input_field_folder.text()
 
         if text_category and text_folder:
-            # Здесь вы можете добавить свою логику обработки текста
             self.model.add_category(text_category, text_folder)
 
             self.model.create_folder(text_folder)
@@ -138,8 +146,34 @@ class SortingController(QObject):
 
             self.update_view()
         else:
-            self.view.show_message(self, "Предупреждение", "Поле ввода пустое!")
+            self.view.show_message("Предупреждение", "Поле ввода пустое!")
 
 
+    def reset_category(self):
+        for i in range(self.view.grid_widget.grid.count()):
+            widget = self.view.grid_widget.grid.itemAt(i).widget()
+            if isinstance(widget, ImageItemWidget):
+                folder_name = self.model.category_config[self.model.category]['folder']
+                widget.category_combo.setCurrentText(folder_name)
 
-        
+        self.update_view()
+
+
+    def right_panel_apply_requested(self):
+        # Сбрасываем прогресс перед началом операции
+        self.view.progress_bar_widget.reset()
+        self.model.process_selected_images()
+
+        # Гарантируем 100% по завершении
+        if self.view.progress_bar_widget.progress_bar.value() < 100:
+            self.view.progress_bar_widget.progress_bar.setValue(100)
+
+        self.update_view()
+
+
+    def increment_selection(self, id, state):
+        self.model.increment_selection(id, state)
+
+        self.view.left_panel.update_select_label(self.model.select_count)
+
+

@@ -6,6 +6,7 @@ from app.widgets.image_widget import ImageItemWidget
 
 class ImageGridWidget(QWidget):
     page_changed = pyqtSignal(int)
+    select_changed = pyqtSignal(int, bool)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -52,6 +53,11 @@ class ImageGridWidget(QWidget):
             item = ImageItemWidget(image_properties, category_config, name_all_folders)
             self.grid.addWidget(item, row, col, Qt.AlignCenter)
 
+            # Подключаем сигнал дочернего виджета к родительскому сигналу
+            item.selection_changed.connect(
+                lambda id, checked: self.select_changed.emit(id, checked)
+            )
+
 
     def clear_grid(self):
         while self.grid.count():
@@ -66,4 +72,3 @@ class ImageGridWidget(QWidget):
             widget = self.grid.itemAt(i).widget()
             if isinstance(widget, ImageItemWidget):
                 widget.checkbox.setChecked(checked)
-    

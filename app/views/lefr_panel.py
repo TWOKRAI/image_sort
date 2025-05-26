@@ -16,37 +16,26 @@ class LeftPanel(QFrame):
         self.setup_connections()
 
 
-    # def init_ui(self):
-    #     layout = QVBoxLayout()
-
-    #     self.folder_combo = self.create_folder_combo()
-    #     layout.addWidget(self.folder_combo, 1)
-    #     layout.addSpacing(20)
-
-    #     self.page_label = self.create_page_label()
-    #     layout.addWidget(self.page_label)
-    #     layout.addSpacing(20)
-
-    #     self.clear_btn = self.create_clear_button()
-    #     layout.addWidget(self.clear_btn)
-
-    #     layout.addStretch()
-
-    #     self.setLayout(layout)
-
     def init_ui(self):
-        layout = QVBoxLayout()
+        layout = QVBoxLayout()   
+
+        select_label_layout, self.select_label = self.create_label_panel(f'Выбрано элементов: 0')     
+        layout.addLayout(select_label_layout)
+        layout.addSpacing(20)
+
 
         self.folder_combo = self.create_folder_combo()
         layout.addWidget(self.folder_combo, 1)
         layout.addSpacing(20)
 
-        # Создаем горизонтальный макет для self.page_label
-        page_label_layout = QHBoxLayout()
-        page_label_layout.addStretch()  # Гибкое пространство слева
-        self.page_label = self.create_page_label()
-        page_label_layout.addWidget(self.page_label)
-        page_label_layout.addStretch()  # Гибкое пространство справа
+        # # Создаем горизонтальный макет для self.page_label
+        # page_label_layout = QHBoxLayout()
+        # page_label_layout.addStretch()  # Гибкое пространство слева
+        # self.page_label = self.create_page_label("0/0")
+        # page_label_layout.addWidget(self.page_label)
+        # page_label_layout.addStretch()  # Гибкое пространство справа
+
+        page_label_layout, self.page_label = self.create_label_panel("0/0")
 
         # Добавляем горизонтальный макет в вертикальный макет
         layout.addLayout(page_label_layout)
@@ -85,8 +74,8 @@ class LeftPanel(QFrame):
         self.folder_combo.blockSignals(False)
 
 
-    def create_page_label(self):
-        page_label = QLabel("0/0")
+    def create_label(self, text):
+        page_label = QLabel(text)
 
         font = QFont()
         font.setFamily("Arial") 
@@ -95,10 +84,22 @@ class LeftPanel(QFrame):
 
         return page_label
     
+
+    def create_label_panel(self, text):
+        label_layout = QHBoxLayout()
+        label_layout.addStretch()
+        label = self.create_label(text)
+        label_layout.addWidget(label)
+        label_layout.addStretch()
+
+        return label_layout, label
+    
     
     def update_page_label(self, current_page, total_pages):
         self.page_label.setText(f"{current_page}/{total_pages}")
 
+    def update_select_label(self, select_count):
+        self.select_label.setText(f"Выбрано элементов: {select_count}")
 
     def create_clear_button(self):
         clear_btn = QPushButton("Очистить папку")
